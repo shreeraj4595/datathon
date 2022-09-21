@@ -21,5 +21,9 @@ To run this, execute the below from the src folder
 ```sh
 uvicorn main:app --reload
 ```
+or run
+```sh
+python3 main.py
+```
 This runs on port 8000 and accessible using http://127.0.0.1:8000. 
 http://127.0.0.1:8000/docs contains the Swagger docs of all the API.
