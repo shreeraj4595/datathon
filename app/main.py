@@ -16,6 +16,9 @@ app.add_middleware(
 
 @app.get("/getPublishedDate")
 async def get_date_difference():
+    '''
+    THIS API IS ONLY FOR DEV PURPOSE
+    '''
     return es.get_dates_diff()
 
 
