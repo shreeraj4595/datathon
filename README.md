@@ -27,3 +27,21 @@ python3 main.py
 ```
 This runs on port 8000 and accessible using http://127.0.0.1:8000. 
 http://127.0.0.1:8000/docs contains the Swagger docs of all the API.
+
+To build the docker image (run this if there is a change in the dockerfile)
+```sh
+docker build -t datathon-datacrafters .
+```
+datathon-datacrafters is the service name
+
+To run the container when the above command is ran
+```sh
+docker run -d --name datathon -p 11202:11202 datathon-datacrafters:latest
+```
+11202 is the port on which this app will be running
+
+To start and stop the container
+```sh
+docker start datathon
+docker stop datathon
+```
