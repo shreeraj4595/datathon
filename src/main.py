@@ -1,6 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 import uvicorn
 import es
 import db
@@ -30,10 +30,11 @@ def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
     """
     ret = db.get_subject_data(limit, skip, sub_area)
     if ret == "":
-        return {
-            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-            "message": "Oops! Something went wrong",
-        }
+        # return {
+        #     "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     "message": "Oops! Something went wrong",
+        # }
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     # logging.info(ret)
     return ret
 
@@ -50,10 +51,11 @@ def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "db"):
     else:
         ret = es.get_sub_areas_list(limit)
     if ret == "":
-        return {
-            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-            "message": "Oops! Something went wrong",
-        }
+        # return {
+        #     "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     "message": "Oops! Something went wrong",
+        # }
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     # logging.info(ret)
     return ret
 
