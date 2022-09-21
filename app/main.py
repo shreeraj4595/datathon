@@ -24,12 +24,12 @@ app.add_middleware(
 )
 
 @app.get("/getPublishedDate")
-def get_date_difference():
+async def get_date_difference():
     return es.get_dates_diff()
 
 
 @app.get("/getSubjectAreaData", status_code=200)
-def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
+async def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
     """
     This API is used to query the set of data from Artifacts table.
     limit is default to 100, can be passed other values from the caller
@@ -48,7 +48,7 @@ def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
 
 
 @app.get("/getSubjectArea", status_code=200)
-def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "db"):
+async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "db"):
     """
     This API is used to get the list of subject area. This DB query takes lot of time, use with caution and only if necessary
     limit is default to 100, can be passed other values from the caller. Give query_from as "es" to query from Elastic Search
