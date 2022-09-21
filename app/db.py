@@ -1,14 +1,6 @@
-import logging
-from logging.handlers import RotatingFileHandler
 import psycopg2
 import config
 
-logging.basicConfig(
-    handlers=[RotatingFileHandler("app.log", maxBytes=100000, backupCount=10)],
-    level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S",
-)
 conn = ""
 
 def connect():
@@ -21,15 +13,15 @@ def connect():
             password=config.db_password,
             port=config.db_port,
         )
-        logging.info("PostgreSQL connection is opened")
+        print("PostgreSQL connection is opened")
         return conn.cursor()
     except Exception as ex:
-        logging.info(ex)
+        print(ex)
         return ""
 
 
 def get_subject_data(limit, offset, where):
-    logging.info(f"get_subject_data {limit}, {offset}, {where}")
+    print(f"get_subject_data {limit}, {offset}, {where}")
     final_data = {}
     cursor = connect()
     if cursor == "":
@@ -72,18 +64,18 @@ def get_subject_data(limit, offset, where):
         cursor.close()
         return final_data
     except Exception as ex:
-        logging.info(f"Exception in get_subject_data {ex}")
+        print(f"Exception in get_subject_data {ex}")
         return ""
     finally:
         if conn:
             cursor.close()
             conn.close()
-            logging.info("PostgreSQL connection is closed")
+            print("PostgreSQL connection is closed")
 
 
 def get_subject_data_list(limit, offset):
     try:
-        logging.info(f"get_subject_data_list {limit}")
+        print(f"get_subject_data_list {limit}")
         final_data = []
         cursor = connect()
         if cursor == "":
@@ -102,10 +94,10 @@ def get_subject_data_list(limit, offset):
         cursor.close()
         return final_data
     except Exception as ex:
-        logging.info(f"Exception in get_subject_data_list {ex}")
+        print(f"Exception in get_subject_data_list {ex}")
         return ""
     finally:
         if conn:
             cursor.close()
             conn.close()
-            logging.info("PostgreSQL connection is closed")
+            print("PostgreSQL connection is closed")

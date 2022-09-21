@@ -1,16 +1,6 @@
-import logging
-from logging.handlers import RotatingFileHandler
 import json
 import requests
 import config
-
-logging.basicConfig(
-    handlers=[RotatingFileHandler("app.log", maxBytes=100000, backupCount=10)],
-    level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S",
-)
-
 
 def get_dates_diff():
     url = config.endpoint_url
@@ -38,12 +28,12 @@ def get_dates_diff():
 
     response = requests.request("GET", url, headers=headers, data=payload)
 
-    logging.info(response.text)
+    print(response.text)
     return json.loads(response.text)
 
 
 def get_sub_areas_list(size):
-    logging.info(f"get_sub_areas_list {size}")
+    print(f"get_sub_areas_list {size}")
     url = config.endpoint_url
     payload = json.dumps(
         {
@@ -75,5 +65,5 @@ def get_sub_areas_list(size):
         flat_list = [item for sublist in final_subjects for item in sublist]
         return flat_list
     except Exception as ex:
-        logging.info(ex)
+        print(ex)
         return ""

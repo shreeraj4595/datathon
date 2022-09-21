@@ -1,5 +1,3 @@
-import logging
-from logging.handlers import RotatingFileHandler
 from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -7,13 +5,6 @@ import es
 import db
 
 app = FastAPI()
-
-logging.basicConfig(
-    handlers=[RotatingFileHandler("app.log", maxBytes=100000, backupCount=10)],
-    level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S",
-)
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,7 +34,7 @@ async def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
         #     "message": "Oops! Something went wrong",
         # }
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
-    # logging.info(ret)
+    # print(ret)
     return ret
 
 
@@ -64,9 +55,9 @@ async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "d
         #     "message": "Oops! Something went wrong",
         # }
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
-    # logging.info(ret)
+    # print(ret)
     return ret
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8082)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8082)
