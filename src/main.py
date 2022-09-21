@@ -1,12 +1,9 @@
-from fastapi import FastAPI
-import json
-import requests
-import config
-import db
-import uvicorn
-import json
 import logging
 from logging.handlers import RotatingFileHandler
+from fastapi import FastAPI, status
+import uvicorn
+import es
+import db
 
 app = FastAPI()
 
@@ -20,36 +17,10 @@ logging.basicConfig(
 
 @app.get("/getPublishedDate")
 def get_date_difference():
-    url = config.endpoint_url
-
-    payload = json.dumps(
-        {
-            "version": True,
-            "size": config.record_size,
-            "sort": [{"_score": {"order": "desc"}}],
-            "query": {
-                "bool": {
-                    "must": [],
-                    "filter": [
-                        {"match_all": {}},
-                        {"exists": {"field": "dates_accepted"}},
-                    ],
-                    "should": [],
-                    "must_not": [],
-                }
-            },
-            "_source": ["dates_accepted", "dates_online"],
-        }
-    )
-    headers = {"Content-Type": "application/json"}
-
-    response = requests.request("GET", url, headers=headers, data=payload)
-
-    logging.info(response.text)
-    return json.loads(response.text)
+    return es.get_dates_diff()
 
 
-@app.get("/getSubjectAreaData")
+@app.get("/getSubjectAreaData", status_code=200)
 def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
     """
     This API is used to query the set of data from Artifacts table.
@@ -59,21 +30,30 @@ def get_subject_data(limit: int = 100, sub_area: str = "", skip: int = 0):
     """
     ret = db.get_subject_data(limit, skip, sub_area)
     if ret == "":
-        return {"code": 500, "message": "Oops! Something went wrong"}
+        return {
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": "Oops! Something went wrong",
+        }
     # logging.info(ret)
     return ret
 
 
-@app.get("/getSubjectArea")
-def get_subject_list(limit: int = 100, skip: int = 0):
+@app.get("/getSubjectArea", status_code=200)
+def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "db"):
     """
     This API is used to get the list of subject area. This DB query takes lot of time, use with caution and only if necessary
-    limit is default to 100, can be passed other values from the caller
+    limit is default to 100, can be passed other values from the caller. Give query_from as "es" to query from Elastic Search
     skip is the offset to specify from what record to query for default to 0
     """
-    ret = db.get_subject_data_list(limit, skip)
+    if query_from == "db":
+        ret = db.get_subject_data_list(limit, skip)
+    else:
+        ret = es.get_sub_areas_list(limit)
     if ret == "":
-        return {"code": 500, "message": "Oops! Something went wrong"}
+        return {
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": "Oops! Something went wrong",
+        }
     # logging.info(ret)
     return ret
 

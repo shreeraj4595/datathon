@@ -1,7 +1,7 @@
-import config
-import psycopg2
 import logging
 from logging.handlers import RotatingFileHandler
+import psycopg2
+import config
 
 logging.basicConfig(
     handlers=[RotatingFileHandler("app.log", maxBytes=100000, backupCount=10)],
@@ -10,7 +10,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 conn = ""
-
 
 def connect():
     try:
@@ -69,10 +68,6 @@ def get_subject_data(limit, offset, where):
             return_list["dyson_id"] = row[8]
             final_data[index] = return_list
             index = index + 1
-            # if return_list not in final_data:
-            #     pass
-            # else:
-            # final_data.append(return_list.copy())
 
         cursor.close()
         return final_data
