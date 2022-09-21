@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from fastapi import FastAPI, status, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import es
 import db
@@ -14,6 +15,13 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/getPublishedDate")
 def get_date_difference():
