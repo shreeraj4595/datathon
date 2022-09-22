@@ -84,5 +84,5 @@ async def get_country_data(data: DataModelIn):
     return ret
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8082)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8082)
