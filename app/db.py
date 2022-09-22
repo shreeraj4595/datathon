@@ -150,3 +150,33 @@ def get_country_data(limit, offset, where):
             cursor.close()
             conn.close()
             print("PostgreSQL connection is closed")
+
+
+def get_country_list(limit, offset):
+    try:
+        print(f"get_country_list {limit}")
+        final_data = []
+        cursor = connect()
+        if cursor == "":
+            return ""
+        query = (
+            "select distinct authors_0_aff_address_country from Authors where authors_0_aff_address_country is not NULL limit "
+            + str(limit)
+            + " offset "
+            + str(offset),
+        )
+        cursor.execute(" ".join(query))
+        subject_list = cursor.fetchall()
+        for row in subject_list:
+            final_data.append(row[0])
+
+        cursor.close()
+        return final_data
+    except Exception as ex:
+        print(f"Exception in get_country_list {ex}")
+        return ""
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
