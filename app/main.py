@@ -84,9 +84,6 @@ async def get_country_data(data: DataModelIn):
     return ret
 
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8082)
-
 @app.get("/getCountryList", status_code=200)
 async def get_country_list(limit: int = 100, skip: int = 0):
     """
@@ -96,3 +93,7 @@ async def get_country_list(limit: int = 100, skip: int = 0):
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
+
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8082)
