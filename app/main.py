@@ -61,6 +61,24 @@ async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "d
     # print(ret)
     return ret
 
+@app.get("/getCountryWiseData", status_code=200)
+async def get_country_data(limit: int = 100, country: str = "", skip: int = 0):
+    """
+    This API is used to query the set of data from authors and artifacts table.
+    limit is default to 100, can be passed other values from the caller
+    country can be queried for particular value not mandatory
+    skip is the offset to specify from what record to query for default to 0
+    """
+    ret = db.get_country_data(limit, skip, country)
+    if ret == "":
+        # return {
+        #     "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     "message": "Oops! Something went wrong",
+        # }
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
+    # print(ret)
+    return ret
+
 
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8082)
