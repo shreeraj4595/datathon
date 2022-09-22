@@ -3,7 +3,7 @@ from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import List
 import es
 import db
 
@@ -17,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class DataModelIn(BaseModel):
     limit: int = 100
     sub_area: str = ""
@@ -24,11 +25,12 @@ class DataModelIn(BaseModel):
     country: str = ""
     year: List[str] = []
 
+
 @app.get("/getPublishedDate")
 async def get_date_difference():
-    '''
+    """
     THIS API IS ONLY FOR DEV PURPOSE
-    '''
+    """
     return es.get_dates_diff()
 
 
@@ -36,12 +38,16 @@ async def get_date_difference():
 async def get_subject_data(data: DataModelIn):
     """
     This API is used to query the set of data from Artifacts table.
-    limit is default to 100, can be passed other values from the caller
-    sub area can be queried for particular value not mandatory
-    skip is the offset to specify from what record to query for default to 0
+    limit is default to 100, can be passed other values from the caller.
+    sub area can be queried for particular value not mandatory.
+    skip is the offset to specify from what record to query for default to 0.
+    pass country as empty string.
+    year is a list of string eg: ['2022','2020']
     """
     if data.country != "":
-        raise HTTPException(status_code=400, detail="Country param is invalid in this API")
+        raise HTTPException(
+            status_code=400, detail="Country param is invalid in this API"
+        )
     ret = db.get_subject_data(data.limit, data.skip, data.sub_area, data.year)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
@@ -68,16 +74,21 @@ async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "d
     # print(ret)
     return ret
 
+
 @app.post("/getCountryWiseData", status_code=200)
 async def get_country_data(data: DataModelIn):
     """
     This API is used to query the set of data from authors and artifacts table.
-    limit is default to 100, can be passed other values from the caller
-    country can be queried for particular value not mandatory
-    skip is the offset to specify from what record to query for default to 0
+    limit is default to 100, can be passed other values from the caller.
+    country can be queried for particular value not mandatory.
+    skip is the offset to specify from what record to query for default to 0.
+    pass sub area as empty string.
+    year is a list of string eg: ['2022','2020'].
     """
     if data.sub_area != "":
-        raise HTTPException(status_code=400, detail="Sub Area param is invalid in this API")
+        raise HTTPException(
+            status_code=400, detail="Sub Area param is invalid in this API"
+        )
     ret = db.get_country_data(data.limit, data.skip, data.country, data.year)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
@@ -87,7 +98,7 @@ async def get_country_data(data: DataModelIn):
 @app.get("/getCountryList", status_code=200)
 async def get_country_list(limit: int = 100, skip: int = 0):
     """
-    This API is used to get the list of Country. 
+    This API is used to get the list of Country.
     """
     ret = db.get_country_list(limit, skip)
     if ret == "":

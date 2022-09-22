@@ -3,6 +3,7 @@ import config
 
 conn = ""
 
+
 def connect():
     try:
         global conn
@@ -32,7 +33,7 @@ def get_subject_data(limit, offset, where, year):
         else:
             where = "and a.subject_areas_crossref_0='" + where + "'"
         if len(year) == 0:
-            year = ['2022', '2021', '2020', '2019', '2018']
+            year = ["2022", "2021", "2020", "2019", "2018"]
         query = (
             "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year",
             "from Artifacts a "
@@ -57,8 +58,8 @@ def get_subject_data(limit, offset, where, year):
             return_list["publisher_name_ui"] = row[3]
             return_list["subject_areas_crossref_0"] = row[4]
             return_list["dates_publ_minus_accepted_days"] = (row[0] - row[1]).days
-            return_list["dates_publ_minus_accepted_month"] = (
-                round(int((row[0] - row[1]).days) / 30, 2)
+            return_list["dates_publ_minus_accepted_month"] = round(
+                int((row[0] - row[1]).days) / 30, 2
             )
             return_list["pub_year"] = row[5]
             final_data[index] = return_list
@@ -116,12 +117,14 @@ def get_country_data(limit, offset, where, year):
         if where == "":
             where = ""
         else:
-            where = "and auth.authors_0_aff_address_country ='" + where.capitalize() + "'"
+            where = (
+                "and auth.authors_0_aff_address_country ='" + where.capitalize() + "'"
+            )
         if len(year) == 0:
-            year = ['2022', '2021', '2020', '2019', '2018']
+            year = ["2022", "2021", "2020", "2019", "2018"]
         query = (
             "select a.top_concepts_0, a.title, a.dates_pub, a.dates_accepted, a.dates_online, auth.authors_0_aff_address_country ",
-            "from Artifacts a "        
+            "from Artifacts a "
             "inner join authors auth on a.dyson_id = auth.dyson_id "
             "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
             "and a.dates_online is not NULL and a.dates_accepted is not NULL "
@@ -144,8 +147,8 @@ def get_country_data(limit, offset, where, year):
             return_list["dates_online"] = row[4]
             return_list["country"] = row[5]
             return_list["dates_publ_minus_accepted_days"] = (row[2] - row[3]).days
-            return_list["dates_publ_minus_accepted_month"] = (
-                round(int((row[2] - row[3]).days) / 30, 2)
+            return_list["dates_publ_minus_accepted_month"] = round(
+                int((row[2] - row[3]).days) / 30, 2
             )
             final_data[index] = return_list
             index = index + 1
