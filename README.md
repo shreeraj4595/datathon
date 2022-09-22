@@ -30,6 +30,11 @@ http://127.0.0.1:8000/docs contains the Swagger docs of all the API.
 
 To build the docker image (run this if there is a change in the dockerfile)
 ```sh
+sh docker_setup.sh
+```
+
+Below are the internal steps that happen inside the shell script
+```sh
 docker build -t datathon-datacrafters .
 ```
 datathon-datacrafters is the service name
