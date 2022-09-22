@@ -82,3 +82,13 @@ async def get_country_data(limit: int = 100, country: str = "", skip: int = 0):
 
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8082)
+
+@app.get("/getCountryList", status_code=200)
+async def get_country_list(limit: int = 100, skip: int = 0):
+    """
+    This API is used to get the list of Country. 
+    """
+    ret = db.get_country_list(limit, skip)
+    if ret == "":
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
+    return ret
