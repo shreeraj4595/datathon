@@ -1,5 +1,6 @@
 import psycopg2
 import config
+import collections
 
 conn = ""
 
@@ -66,7 +67,7 @@ def get_subject_data(limit, offset, where, year):
             index = index + 1
 
         cursor.close()
-        return final_data
+        return collections.OrderedDict(sorted(final_data.items(), key=lambda t:t[1]["pub_year"]))
     except Exception as ex:
         print(f"Exception in get_subject_data {ex}")
         return ""
@@ -123,7 +124,7 @@ def get_country_data(limit, offset, where, year):
         if len(year) == 0:
             year = ["2022", "2021", "2020", "2019", "2018"]
         query = (
-            "select a.top_concepts_0, a.title, a.dates_pub, a.dates_accepted, a.dates_online, auth.authors_0_aff_address_country ",
+            "select a.top_concepts_0, a.title, a.dates_pub, a.dates_accepted, a.dates_online, auth.authors_0_aff_address_country, date_part('year', a.dates_pub) as pub_year ",
             "from Artifacts a "
             "inner join authors auth on a.dyson_id = auth.dyson_id "
             "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
@@ -150,11 +151,12 @@ def get_country_data(limit, offset, where, year):
             return_list["dates_publ_minus_accepted_month"] = round(
                 int((row[2] - row[3]).days) / 30, 2
             )
+            return_list["pub_year"] = row[6]
             final_data[index] = return_list
             index = index + 1
 
         cursor.close()
-        return final_data
+        return collections.OrderedDict(sorted(final_data.items(), key=lambda t:t[1]["pub_year"]))
     except Exception as ex:
         print(f"Exception in get_country_data {ex}")
         return ""
