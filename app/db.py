@@ -193,3 +193,63 @@ def get_country_list(limit, offset):
             cursor.close()
             conn.close()
             print("PostgreSQL connection is closed")
+        
+def get_publisher_list(limit, offset):
+    try:
+        print(f"get_publisher_list {limit}")
+        final_data = []
+        cursor = connect()
+        if cursor == "":
+            return ""
+        query = (
+            "select distinct publisher from Publisher where publisher is not NULL limit "
+            + str(limit)
+            + " offset "
+            + str(offset),
+        )
+        cursor.execute(" ".join(query))
+        subject_list = cursor.fetchall()
+        for row in subject_list:
+            row=row[0].split(",")[1]
+            row=row[1:-1]
+            final_data.append(row)
+
+        cursor.close()
+        return final_data
+    except Exception as ex:
+        print(f"Exception in get_publisher_list {ex}")
+        return ""
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
+
+def get_journal_list(limit, offset):
+    try:
+        print(f"get_journal_list {limit}")
+        final_data = []
+        cursor = connect()
+        if cursor == "":
+            return ""
+        query = (
+            "select distinct clean_journal_name from Journal where clean_journal_name is not NULL limit "
+            + str(limit)
+            + " offset "
+            + str(offset),
+        )
+        cursor.execute(" ".join(query))
+        subject_list = cursor.fetchall()
+        for row in subject_list:
+            final_data.append(row[0])
+
+        cursor.close()
+        return final_data
+    except Exception as ex:
+        print(f"Exception in get_journal_list {ex}")
+        return ""
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
