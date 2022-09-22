@@ -27,6 +27,10 @@ def get_subject_data(limit, offset, where, year):
     if cursor == "":
         return ""
     try:
+        if where == "":
+            where = ""
+        else:
+            where = "and a.subject_areas_crossref_0='" + where + "'"
         if len(year) == 0:
             year = ['2022', '2021', '2020', '2019', '2018']
         query = (
@@ -35,9 +39,9 @@ def get_subject_data(limit, offset, where, year):
             "inner join publisher p on a.publisher_id = p.publisher_id inner join Journal j on a.journal_id=j.journal_id "
             "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
             "and j.journal_name is not NULL and a.dates_online is not NULL and a.dates_accepted is not NULL "
-            "and a.dates_accepted is not NULL and a.subject_areas_crossref_0 LIKE '"
-            + where.capitalize()
-            + "%' and a.top_concepts_0 is not NULL limit "
+            "and a.dates_accepted is not NULL "
+            + where
+            + " and a.top_concepts_0 is not NULL limit "
             + str(limit)
             + " offset "
             + str(offset),
@@ -109,6 +113,10 @@ def get_country_data(limit, offset, where, year):
     if cursor == "":
         return ""
     try:
+        if where == "":
+            where = ""
+        else:
+            where = "and auth.authors_0_aff_address_country ='" + where.capitalize() + "'"
         if len(year) == 0:
             year = ['2022', '2021', '2020', '2019', '2018']
         query = (
@@ -117,9 +125,9 @@ def get_country_data(limit, offset, where, year):
             "inner join authors auth on a.dyson_id = auth.dyson_id "
             "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
             "and a.dates_online is not NULL and a.dates_accepted is not NULL "
-            "and a.dates_accepted is not NULL and auth.authors_0_aff_address_country is not NULL and auth.authors_0_aff_address_country LIKE '"
-            + where.capitalize()
-            + "%' and a.top_concepts_0 is not NULL limit "
+            "and a.dates_accepted is not NULL and auth.authors_0_aff_address_country is not NULL "
+            + where
+            + " and a.top_concepts_0 is not NULL limit "
             + str(limit)
             + " offset "
             + str(offset),
