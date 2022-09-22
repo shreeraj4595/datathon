@@ -41,7 +41,7 @@ async def get_subject_data(data: DataModelIn):
     skip is the offset to specify from what record to query for default to 0
     """
     if data.country != "":
-        raise HTTPException(status_code=400, detail="Year param is invalid in this API")
+        raise HTTPException(status_code=400, detail="Country param is invalid in this API")
     ret = db.get_subject_data(data.limit, data.skip, data.sub_area, data.year)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
