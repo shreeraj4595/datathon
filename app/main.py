@@ -120,5 +120,5 @@ async def get_country_list(limit: int = 100, skip: int = 0):
     return ret
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8082)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8082)
