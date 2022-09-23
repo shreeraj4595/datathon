@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
@@ -33,9 +33,8 @@ async def get_date_difference():
     """
     return es.get_dates_diff()
 
-
 @app.post("/getSubjectAreaData", status_code=200)
-async def get_subject_data(data: DataModelIn):
+async def get_subject_data(request: Request, data: DataModelIn):
     """
     This API is used to query the set of data from Artifacts table.
     limit is default to 100, can be passed other values from the caller.
@@ -48,7 +47,22 @@ async def get_subject_data(data: DataModelIn):
         raise HTTPException(
             status_code=400, detail="Country param is invalid in this API"
         )
-    ret = db.get_subject_data(data.limit, data.skip, data.sub_area, data.year)
+    ret = db.get_subject_data(data.limit, data.skip, data.sub_area, data.year, request)
+    if ret == "":
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
+    return ret
+
+@app.get("/getSubjectAreaData", status_code=200)
+async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0, sub_area: str = "", year: str = ""):
+    """
+    This API is used to query the set of data from Artifacts table.
+    limit is default to 100, can be passed other values from the caller.
+    sub area can be queried for particular value not mandatory.
+    skip is the offset to specify from what record to query for default to 0.
+    pass country as empty string.
+    year is a list of string eg: ['2022','2020']
+    """
+    ret = db.get_subject_data(limit, skip, sub_area, year, request.method)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
@@ -66,10 +80,6 @@ async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "d
     else:
         ret = es.get_sub_areas_list(limit)
     if ret == "":
-        # return {
-        #     "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     "message": "Oops! Something went wrong",
-        # }
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     # print(ret)
     return ret
