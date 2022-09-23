@@ -53,16 +53,20 @@ async def get_subject_data(request: Request, data: DataModelIn):
     return ret
 
 @app.get("/getSubjectAreaData", status_code=200)
-async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0, sub_area: str = "", year: str = ""):
+async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0, sub_area: str = "", year: str = "", query_from: str = "db"):
     """
     This API is used to query the set of data from Artifacts table.
     limit is default to 100, can be passed other values from the caller.
-    sub area can be queried for particular value not mandatory.
-    skip is the offset to specify from what record to query for default to 0.
-    pass country as empty string.
-    year is a list of string eg: ['2022','2020']
+    sub area can be queried for particular value not mandatory but MANDATORY FOR QUERYING FROM ES.
+    skip is the offset to specify from what record to query for default to 0, SKIP NOT USED IN ES.
+    year is a string which is not mandatory for db but MANDATORY FOR ES
     """
-    ret = db.get_subject_data(limit, skip, sub_area, year, request.method)
+    if query_from == "db":
+        ret = db.get_subject_data(limit, skip, sub_area, year, request.method)
+    else:
+        if sub_area == "" or year == "":
+            raise HTTPException(status_code=400, detail="Subject Area and Year are the mandatory fields")
+        ret = es.get_sub_area_data(limit,  year,  year, sub_area)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
@@ -116,5 +120,5 @@ async def get_country_list(limit: int = 100, skip: int = 0):
     return ret
 
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8082)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8082)
