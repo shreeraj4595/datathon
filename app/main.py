@@ -53,7 +53,7 @@ async def get_subject_data(request: Request, data: DataModelIn):
     return ret
 
 @app.get("/getSubjectAreaData", status_code=200)
-async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0, sub_area: str = "", year: str = "", query_from: str = "db"):
+async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0, sub_area: str = "", year: str = "", query_from: str = "es"):
     """
     This API is used to query the set of data from Artifacts table.
     limit is default to 100, can be passed other values from the caller.
@@ -73,7 +73,7 @@ async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0
 
 
 @app.get("/getSubjectArea", status_code=200)
-async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "db"):
+async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "es"):
     """
     This API is used to get the list of subject area. This DB query takes lot of time, use with caution and only if necessary
     limit is default to 100, can be passed other values from the caller. Give query_from as "es" to query from Elastic Search
@@ -120,7 +120,7 @@ async def get_country_list(limit: int = 100, skip: int = 0):
     return ret
 
 @app.get("/getPublisherList", status_code=200)
-async def get_publisher_list(limit: int = 100, skip: int = 0,query_from: str = "db"):
+async def get_publisher_list(limit: int = 100, skip: int = 0,query_from: str = "es"):
     """
     This API is used to get the list of Country.
     """
@@ -134,7 +134,7 @@ async def get_publisher_list(limit: int = 100, skip: int = 0,query_from: str = "
     return ret
 
 @app.get("/getJournalList", status_code=200)
-async def get_journal_list(limit: int = 100, skip: int = 0,query_from: str = "db"):
+async def get_journal_list(limit: int = 100, skip: int = 0,query_from: str = "es"):
     """
     This API is used to get the list of Country.
     """
