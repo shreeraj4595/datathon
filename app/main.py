@@ -106,24 +106,31 @@ async def get_country_list(limit: int = 100, skip: int = 0):
     return ret
 
 @app.get("/getPublisherList", status_code=200)
-async def get_publisher_list(limit: int = 100, skip: int = 0):
+async def get_publisher_list(limit: int = 100, skip: int = 0,query_from: str = "db"):
     """
     This API is used to get the list of Country.
     """
-    ret = db.get_publisher_list(limit, skip)
+    if query_from == "db":
+        ret = db.get_publisher_list(limit, skip)
+    else:
+        ret = es.get_publisher_list(limit)
+
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
 
 @app.get("/getJournalList", status_code=200)
-async def get_journal_list(limit: int = 100, skip: int = 0):
+async def get_journal_list(limit: int = 100, skip: int = 0,query_from: str = "db"):
     """
     This API is used to get the list of Country.
     """
-    ret = db.get_journal_list(limit, skip)
+    if query_from == "db":
+        ret = db.get_journal_list(limit, skip)
+    else:
+        ret = es.get_journal_list(limit)
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
 
 # if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8082)
+#     uvicorn.run(app, host="0.0.0.0", port=8087)

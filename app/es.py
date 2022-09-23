@@ -67,3 +67,75 @@ def get_sub_areas_list(size):
     except Exception as ex:
         print(ex)
         return ""
+
+def get_publisher_list(size):
+    print(f"get_publisher_list {size}")
+    url = config.endpoint_url
+    payload = json.dumps(
+        {
+            "version": True,
+            "size": size,
+            "sort": [{"_score": {"order": "desc"}}],
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                        {"match_all": {}},
+                        {"exists": {"field": "publisher"}},
+                    ],
+                    "should": [],
+                    "must_not": [],
+                }
+            },
+            "_source": ["publisher"],
+        }
+    )
+    headers = {"Content-Type": "application/json"}
+    final_subjects = []
+    try:
+        response = requests.request("GET", url, headers=headers, data=payload)
+        data = json.loads(response.text)
+        for index in data["hits"]["hits"]:
+            final_subjects.append(index["_source"]["publisher"])
+
+        # flat_list = [item for sublist in final_subjects for item in sublist]
+        return final_subjects
+    except Exception as ex:
+        print(ex)
+        return ""
+
+def get_journal_list(size):
+    print(f"get_journal_list {size}")
+    url = config.endpoint_url
+    payload = json.dumps(
+        {
+            "version": True,
+            "size": size,
+            "sort": [{"_score": {"order": "desc"}}],
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                        {"match_all": {}},
+                        {"exists": {"field": "journal_name"}},
+                    ],
+                    "should": [],
+                    "must_not": [],
+                }
+            },
+            "_source": ["journal_name"],
+        }
+    )
+    headers = {"Content-Type": "application/json"}
+    final_subjects = []
+    try:
+        response = requests.request("GET", url, headers=headers, data=payload)
+        data = json.loads(response.text)
+        for index in data["hits"]["hits"]:
+            final_subjects.append(index["_source"]["journal_name"])
+
+        # flat_list = [item for sublist in final_subjects for item in sublist]
+        return final_subjects
+    except Exception as ex:
+        print(ex)
+        return ""
