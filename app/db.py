@@ -1,5 +1,6 @@
 import psycopg2
 import config
+import collections
 
 conn = ""
 
@@ -21,9 +22,9 @@ def connect():
         return ""
 
 
-def get_subject_data(limit, offset, where, year):
+def get_subject_data(limit, offset, where, year, method):
     print(f"get_subject_data {limit}, {offset}, {where}, {year}")
-    final_data = {}
+    final_data, query = {}, ""
     cursor = connect()
     if cursor == "":
         return ""
@@ -31,30 +32,42 @@ def get_subject_data(limit, offset, where, year):
         if where == "":
             where = ""
         else:
-            where = "and a.subject_areas_crossref_0='" + where + "'"
-        if len(year) == 0:
-            year = ["2022", "2021", "2020", "2019", "2018"]
-        query = (
+            where = "and a.subject_areas_crossref_0='" + where + "' and a.subject_areas_crossref_0 is not NULL"
+        if method == "GET":
+            query = (
             "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year",
             "from Artifacts a "
-            "inner join publisher p on a.publisher_id = p.publisher_id inner join Journal j on a.journal_id=j.journal_id "
-            "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
-            "and j.journal_name is not NULL and a.dates_online is not NULL and a.dates_accepted is not NULL "
+            "inner join publisher p on a.publisher_id = p.publisher_id "
+            "where date_part('year', a.dates_pub) = " + year + " "
+            "and a.dates_online is not NULL and a.dates_accepted is not NULL "
             "and a.dates_accepted is not NULL "
             + where
-            + " and a.top_concepts_0 is not NULL limit "
+            + " limit "
             + str(limit)
             + " offset "
             + str(offset),
         )
+        else:
+            if len(year) == 0:
+                year = ["2022", "2021", "2020", "2019", "2018"]
+            query = (
+                "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year",
+                "from Artifacts a "
+                "inner join publisher p on a.publisher_id = p.publisher_id "
+                "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
+                "and a.dates_online is not NULL and a.dates_accepted is not NULL "
+                "and a.dates_accepted is not NULL "
+                + where
+                + " limit "
+                + str(limit)
+                + " offset "
+                + str(offset),
+            )
         cursor.execute(" ".join(query))
         subject_records = cursor.fetchall()
         index = 0
         for row in subject_records:
             return_list = {}
-            # return_list["dates_pub"] = row[0]
-            # return_list["dates_accepted"] = row[1]
-            # return_list["dates_online"] = row[2]
             return_list["publisher_name_ui"] = row[3]
             return_list["subject_areas_crossref_0"] = row[4]
             return_list["dates_publ_minus_accepted_days"] = (row[0] - row[1]).days
@@ -67,6 +80,7 @@ def get_subject_data(limit, offset, where, year):
 
         cursor.close()
         return final_data
+        return collections.OrderedDict(sorted(final_data.items(), key=lambda t:t[1]["pub_year"]))
     except Exception as ex:
         print(f"Exception in get_subject_data {ex}")
         return ""
@@ -123,7 +137,7 @@ def get_country_data(limit, offset, where, year):
         if len(year) == 0:
             year = ["2022", "2021", "2020", "2019", "2018"]
         query = (
-            "select a.top_concepts_0, a.title, a.dates_pub, a.dates_accepted, a.dates_online, auth.authors_0_aff_address_country ",
+            "select a.top_concepts_0, a.title, a.dates_pub, a.dates_accepted, a.dates_online, auth.authors_0_aff_address_country, date_part('year', a.dates_pub) as pub_year ",
             "from Artifacts a "
             "inner join authors auth on a.dyson_id = auth.dyson_id "
             "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
@@ -150,11 +164,13 @@ def get_country_data(limit, offset, where, year):
             return_list["dates_publ_minus_accepted_month"] = round(
                 int((row[2] - row[3]).days) / 30, 2
             )
+            return_list["pub_year"] = row[6]
             final_data[index] = return_list
             index = index + 1
 
         cursor.close()
         return final_data
+        return collections.OrderedDict(sorted(final_data.items(), key=lambda t:t[1]["pub_year"]))
     except Exception as ex:
         print(f"Exception in get_country_data {ex}")
         return ""
