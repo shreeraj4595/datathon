@@ -17,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class DataModelIn(BaseModel):
     limit: int = 100
     sub_area: str = ""
@@ -71,7 +70,6 @@ async def get_subject_data_get(request: Request, limit: int = 100, skip: int = 0
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
 
-
 @app.get("/getSubjectArea", status_code=200)
 async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "es"):
     """
@@ -87,7 +85,6 @@ async def get_subject_list(limit: int = 100, skip: int = 0, query_from: str = "e
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     # print(ret)
     return ret
-
 
 @app.post("/getCountryWiseData", status_code=200)
 async def get_country_data(data: DataModelIn):
@@ -107,7 +104,6 @@ async def get_country_data(data: DataModelIn):
     if ret == "":
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
-
 
 @app.get("/getCountryList", status_code=200)
 async def get_country_list(limit: int = 100, skip: int = 0):
@@ -146,5 +142,28 @@ async def get_journal_list(limit: int = 100, skip: int = 0,query_from: str = "es
         raise HTTPException(status_code=500, detail="Oops! Something went wrong")
     return ret
 
+@app.get("/getPubJournalData", status_code=200)
+async def get_pub_journal_data(request: Request, limit: int = 100, skip: int = 0, journal: str = "", year: str = "", query_from: str = "es", publisher: str = ""):
+    """
+    This API is used to query the set of data from ES.
+    limit is default to 100, can be passed other values from the caller.
+    journal name can be queried for particular value not mandatory.
+    skip is the offset to specify from what record to query for default to 0, SKIP NOT USED IN ES.
+    year is a string which is not mandatory for db but MANDATORY FOR ES
+    QUERYING FROM DATABASE IS NOT DONE FOR THIS API.
+    """
+    if query_from == "db":
+        raise HTTPException(status_code=501, detail="The API does not support the funcationality required to fulfill the request")
+        ret = db.get_subject_data(limit, skip, journal, year, request.method)
+    else:
+        if journal != "" and publisher != "":
+            raise HTTPException(status_code=400, detail="Journal and Publisher both can't be queried at once. Pls request anyone")
+        if year == "":
+            raise HTTPException(status_code=400, detail="Year is a mandatory field")
+        ret = es.get_journal_data(limit,  year,  year, journal, publisher)
+    if ret == "":
+        raise HTTPException(status_code=500, detail="Oops! Something went wrong")
+    return ret
+
 # if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8087)
+#     uvicorn.run(app, host="0.0.0.0", port=8082)

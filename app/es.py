@@ -210,3 +210,81 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
     except Exception as ex:
         print(ex)
         return ""
+
+def get_journal_data(size, from_year, to_year, journal, publisher ):
+    print(f"get_journal_data {size}, {from_year}, {to_year}, {journal}")
+    url = config.endpoint_url
+    
+    from_year = from_year + "-01-01"
+    to_year = to_year + "-12-31"
+    payload = json.dumps(
+        {
+            "version": True,
+            "size": size,
+            "sort": [{"_score": {"order": "asc"}}],
+            "query": {
+                "bool": {
+                    "must": [],
+                    "filter": [
+                        {"match_all": {}},
+                        {"exists": {"field": "dates_accepted"}},
+                        {
+                            "range": {
+                                "dates_pub": {"gte": from_year, "lt": to_year}
+                            }
+                        },
+                    ],
+                    # "should": [{"match_phrase": {"journal_name": journal}}],
+                    # "minimum_should_match": 1,
+                    "must_not": [],
+                }
+            },
+            "_source": [
+                "dates_pub", "dates_accepted", "dates_online", "publisher_name_ui", "journal_name"
+            ],
+        }
+    )
+    headers = {"Content-Type": "application/json"}
+    if journal != "" and publisher == "":
+        add_journal = [{"match_phrase": {"journal_name": journal}}]
+        temp = json.loads(payload)
+        temp['query']['bool']['should'] = add_journal
+        temp['query']['bool']['minimum_should_match'] = 1
+        payload = json.dumps(temp)
+    elif journal == "" and publisher != "":
+        add_pub = [{"match_phrase": {"publisher_name_ui": publisher}}]
+        temp = json.loads(payload)
+        temp['query']['bool']['should'] = add_pub
+        temp['query']['bool']['minimum_should_match'] = 1
+        payload = json.dumps(temp)
+    final_data = {}
+    try:
+        response = requests.request("GET", url, headers=headers, data=payload)
+        data = json.loads(response.text)
+        index = 0
+        format = '%Y-%m-%d'
+
+        for ind in data["hits"]["hits"]:
+            return_list = {}
+            for i, j in enumerate(ind["_source"]["journal_name"]):
+                    if "dates_pub" in ind["_source"] and "dates_accepted" in ind["_source"]:
+                        publ = datetime.datetime.strptime(ind["_source"]["dates_pub"], format)
+                        accpt = datetime.datetime.strptime(ind["_source"]["dates_accepted"], format)
+                        return_list["journal_name"] = ind["_source"]["journal_name"] if "journal_name" in ind["_source"] else ""             
+                        return_list['dates_pub'] = ind["_source"]["dates_pub"]
+                        return_list['dates_accepted'] = ind["_source"]["dates_accepted"] 
+                        return_list['publisher_name_ui'] = ind["_source"]["publisher_name_ui"] if "publisher_name_ui" in ind["_source"] else ""
+                        return_list["dates_publ_minus_accepted_days"] = (publ - accpt).days
+                        return_list["dates_publ_minus_accepted_month"] = round(
+                            int((publ - accpt).days) / 30, 2
+                        )
+                        return_list['pub_year'] = publ.year
+                        final_data[index] = return_list
+                        index = index + 1
+                    else:
+                        continue  
+            
+        return final_data
+    except Exception as ex:
+        print(ex)
+        return ""
