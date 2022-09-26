@@ -266,7 +266,7 @@ def get_journal_data(size, from_year, to_year, journal, publisher ):
 
         for ind in data["hits"]["hits"]:
             return_list = {}
-            for i, j in enumerate(ind["_source"]["journal_name"]):
+            for i, j in enumerate(ind["_source"]):
                     if "dates_pub" in ind["_source"] and "dates_accepted" in ind["_source"]:
                         publ = datetime.datetime.strptime(ind["_source"]["dates_pub"], format)
                         accpt = datetime.datetime.strptime(ind["_source"]["dates_accepted"], format)
