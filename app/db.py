@@ -25,6 +25,8 @@ def connect():
 def get_subject_data(limit, offset, where, year, method):
     print(f"get_subject_data {limit}, {offset}, {where}, {year}")
     final_data, query = {}, ""
+    minimum = 0
+    maximum = 0
     cursor = connect()
     if cursor == "":
         return ""
@@ -35,9 +37,10 @@ def get_subject_data(limit, offset, where, year, method):
             where = "and a.subject_areas_crossref_0='" + where + "' and a.subject_areas_crossref_0 is not NULL"
         if method == "GET":
             query = (
-            "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year",
+            "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year, j.journal_name",
             "from Artifacts a "
             "inner join publisher p on a.publisher_id = p.publisher_id "
+            "inner join Journal j on a.journal_id=j.journal_id"
             "where date_part('year', a.dates_pub) = " + year + " "
             "and a.dates_online is not NULL and a.dates_accepted is not NULL "
             "and a.dates_accepted is not NULL "
@@ -51,9 +54,10 @@ def get_subject_data(limit, offset, where, year, method):
             if len(year) == 0:
                 year = ["2022", "2021", "2020", "2019", "2018"]
             query = (
-                "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year",
+                "select a.dates_pub, a.dates_accepted, a.dates_online, p.publisher_name_ui, a.subject_areas_crossref_0, date_part('year', a.dates_pub) as pub_year, j.journal_name",
                 "from Artifacts a "
                 "inner join publisher p on a.publisher_id = p.publisher_id "
+                "inner join Journal j on a.journal_id=j.journal_id "
                 "where date_part('year', a.dates_pub) in (" + ", ".join(year) + ") "
                 "and a.dates_online is not NULL and a.dates_accepted is not NULL "
                 "and a.dates_accepted is not NULL "
@@ -75,10 +79,21 @@ def get_subject_data(limit, offset, where, year, method):
                 int((row[0] - row[1]).days) / 30, 2
             )
             return_list["pub_year"] = row[5]
+            return_list["journal_name"] = row[6]
             final_data[index] = return_list
             index = index + 1
-
+            if (return_list["dates_publ_minus_accepted_days"] < minimum and return_list["dates_publ_minus_accepted_days"] > 0) or minimum == 0:
+                minimum =  return_list["dates_publ_minus_accepted_days"]
+            if return_list["dates_publ_minus_accepted_days"] > maximum:
+                maximum = return_list["dates_publ_minus_accepted_days"]
+            if return_list["dates_publ_minus_accepted_days"] < minimum or minimum == 0:
+                actual_min = return_list["dates_publ_minus_accepted_days"]
         cursor.close()
+        
+        final_data['maximum_days'] = maximum
+        final_data['minimum_days'] = minimum
+        final_data['actual_minimum_days'] = actual_min
+        final_data['avg_days'] = round(int(maximum + minimum) / (len(final_data) - 3), 2)
         return final_data
         return collections.OrderedDict(sorted(final_data.items(), key=lambda t:t[1]["pub_year"]))
     except Exception as ex:

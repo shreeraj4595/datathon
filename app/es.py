@@ -174,6 +174,7 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
                 "dates_accepted",
                 "dates_online",
                 "publisher_name_ui",
+                "journal_name"
             ],
         }
     )
@@ -184,6 +185,8 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
         data = json.loads(response.text)
         index = 0
         format = '%Y-%m-%d'
+        minimum, actual_min, avg = 0, 0, 0.0
+        maximum = 0
 
         for ind in data["hits"]["hits"]:
             return_list = {}
@@ -196,6 +199,7 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
                         return_list['dates_pub'] = ind["_source"]["dates_pub"]
                         return_list['dates_accepted'] = ind["_source"]["dates_accepted"] 
                         return_list['publisher_name_ui'] = ind["_source"]["publisher_name_ui"]
+                        return_list['journal_name'] = ind["_source"]["journal_name"] if "journal_name" in ind["_source"] else ""
                         return_list["dates_publ_minus_accepted_days"] = (publ - accpt).days
                         return_list["dates_publ_minus_accepted_month"] = round(
                             int((publ - accpt).days) / 30, 2
@@ -204,8 +208,18 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
                         final_data[index] = return_list
                         index = index + 1
                     else:
-                        continue  
-            
+                        continue
+                    
+                    if (return_list["dates_publ_minus_accepted_days"] < minimum and return_list["dates_publ_minus_accepted_days"] > 0) or minimum == 0:
+                        minimum =  return_list["dates_publ_minus_accepted_days"]
+                    if return_list["dates_publ_minus_accepted_days"] > maximum:
+                        maximum = return_list["dates_publ_minus_accepted_days"]
+                    if return_list["dates_publ_minus_accepted_days"] < minimum or minimum == 0:
+                        actual_min = return_list["dates_publ_minus_accepted_days"]
+        final_data['maximum_days'] = maximum
+        final_data['minimum_days'] = minimum
+        final_data['actual_minimum_days'] = actual_min
+        final_data['avg_days'] = round(int(maximum + minimum) / (len(final_data) - 3), 2)
         return final_data
     except Exception as ex:
         print(ex)
