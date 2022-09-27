@@ -198,7 +198,7 @@ def get_sub_area_data(size, from_year, to_year, sub_area ):
                         return_list["subject_areas_crossref_0"] = sub_area              
                         return_list['dates_pub'] = ind["_source"]["dates_pub"]
                         return_list['dates_accepted'] = ind["_source"]["dates_accepted"] 
-                        return_list['publisher_name_ui'] = ind["_source"]["publisher_name_ui"]
+                        return_list['publisher_name_ui'] = ind["_source"]["publisher_name_ui"] if "publisher_name_ui" in ind["_source"] else ""
                         return_list['journal_name'] = ind["_source"]["journal_name"] if "journal_name" in ind["_source"] else ""
                         return_list["dates_publ_minus_accepted_days"] = (publ - accpt).days
                         return_list["dates_publ_minus_accepted_month"] = round(
