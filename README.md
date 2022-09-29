@@ -11,7 +11,7 @@ This api is built using *fastapi* library which is one of the leading and quickl
 
 * /bin contains all the shell scripts etc.,
 * /docs contains all the related documents of this application
-* /src is the main folder which has codes
+* /app is the main folder which has codes
     * config.py contains all the configs
     * main.py is the main code to be ran
 * /tests folder contains all the test cases
